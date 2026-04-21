@@ -24,7 +24,8 @@ jobs:
           -filter_complex "[0:v]scale=1280:720, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%H\\:%M}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{gmtime\:%H\\h %M\\m}':fontcolor=yellow:fontsize=30:x=30:y=30:box=1:boxcolor=black@0.6, \
-          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text_source='STUDY|BREAK':text_index='%{expr\:if(lt(mod(t,3600),3000),0,1)}':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6[v]" \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)', \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]" \
           -map "[v]" -map 1:a:0 \
           -c:v libx264 -preset ultrafast -b:v 1500k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 60 \
           -c:a aac -b:a 128k -f flv rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}
