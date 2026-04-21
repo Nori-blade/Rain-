@@ -1,0 +1,28 @@
+name: 24/7 Study Stream
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Restarts every 6 hours automatically
+  workflow_dispatch:       # Allows manual start
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg and Fonts
+        run: |
+          sudo apt update
+          sudo apt install ffmpeg fonts-liberation -y
+
+      - name: Launch Stream with Clock & Timer
+        env:
+          TZ: Asia/Kathmandu
+        run: |
+          ffmpeg -re -stream_loop -1 -i video.mp4 -stream_loop -1 -i rain.mp3 \
+          -filter_complex "[0:v]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Local Time\: %{localtime\:%I\\\:%M %p}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6,drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Session Time\: %{pts\:hms}':fontcolor=yellow:fontsize=35:x=30:y=30:box=1:boxcolor=black@0.6[v]" \
+          -map "[v]" -map 1:a:0 \
+          -c:v libx264 -preset veryfast -b:v 1500k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 60 \
+          -c:a aac -b:a 128k -f flv rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}
