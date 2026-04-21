@@ -19,14 +19,14 @@ jobs:
 
       - name: Launch Stream
         env:
-          TZ: Asia/Kathmandu
+          TZ: Asia
         run: |
           sleep 5
           ffmpeg -re -stream_loop -1 -i video.mp4 -stream_loop -1 -i rain.mp3 \
           -filter_complex "[0:v]scale=1280:720, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Local Time\: %{localtime\:%I\\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Session Time\: %{gmtime\:%H\\h %M\\m}':fontcolor=yellow:fontsize=30:x=30:y=30:box=1:boxcolor=black@0.6, \
-          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Status\: %{expr\:if(lt(mod(t,3600),3000),text(\'STUDY\'),text(\'BREAK\'))}':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6[v]" \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Status\: %{expr\:if(lt(mod(t,3600),3000),1,0)}':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:text_source='STUDY|BREAK':text_index='%{expr\:if(lt(mod(t,3600),3000),0,1)}'[v]" \
           -map "[v]" -map 1:a:0 \
           -c:v libx264 -preset ultrafast -b:v 1500k -maxrate 1500k -bufsize 3000k -pix_fmt yuv420p -g 60 \
           -c:a aac -b:a 128k -f flv rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}
