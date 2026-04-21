@@ -2,7 +2,7 @@ name: 24/7 Study Stream
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Resets the stream every 6 hours
+    - cron: '0 */6 * * *'  # Automatic restart
   workflow_dispatch:       # Manual trigger
 
 jobs:
@@ -22,11 +22,9 @@ jobs:
           TZ: Asia/Kathmandu
         run: |
           sleep 5
-          ffmpeg -re -stream_loop -1 -i video.mp4 -stream_loop -1 -i rain.mp3 -i thanks.png \
-          -filter_complex "[0:v]scale=1280:720[bg]; \
-          [2:v]scale=600:-1[logo]; \
-          [bg][logo]overlay=(W-w)/2:(H-h)/2:enable='between(t,21540,21600)'[outv]; \
-          [outv]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Local Time\: %{localtime\:%I\\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
+          ffmpeg -re -stream_loop -1 -i video.mp4 -stream_loop -1 -i rain.mp3 \
+          -filter_complex "[0:v]scale=1280:720, \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Local Time\: %{localtime\:%I\\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Session Time\: %{gmtime\:%H\\h %M\\m}':fontcolor=yellow:fontsize=30:x=30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='Status\: %{expr\:if(lt(mod(t,3600),3000),text(\'STUDY\'),text(\'BREAK\'))}':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6[v]" \
           -map "[v]" -map 1:a:0 \
