@@ -2,8 +2,8 @@ name: 24/7 Study Stream
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Automatic restart
-  workflow_dispatch:       # Manual trigger
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   stream:
@@ -17,13 +17,13 @@ jobs:
           sudo apt update
           sudo apt install ffmpeg fonts-liberation -y
 
-     - name: Launch Stream
+      - name: Launch Stream
         run: |
           sleep 5
           ffmpeg -re -stream_loop -1 -i video.mp4 -stream_loop -1 -i rain.mp3 \
           -filter_complex "[0:v]scale=1280:720, \
-          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime:%H:%M}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
-          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{gmtime:%H\\h %M\\m}':fontcolor=yellow:fontsize=30:x=30:y=30:box=1:boxcolor=black@0.6, \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%H\\:%M}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
+          drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{gmtime\:t\:%H\\h %M\\m}':fontcolor=yellow:fontsize=30:x=30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)', \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]" \
           -map "[v]" -map 1:a:0 \
