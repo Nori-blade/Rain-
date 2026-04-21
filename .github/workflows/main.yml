@@ -23,9 +23,9 @@ jobs:
           ffmpeg -re -stream_loop -1 -i video.mp4 -re -loop 1 -i break_pic.png -stream_loop -1 -i rain.mp3 \
           -filter_complex "[0:v]scale=1280:720[main]; [1:v]scale=1280:720[pic]; \
           [main][pic]overlay=enable='gte(mod(t,3600),3000)'[v_mixed]; \
-          [v_mixed]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%H\x3a%M}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
+          [v_mixed]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%H\\\\\:%M}':fontcolor=white:fontsize=45:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-          text='TIMER-%{gmtime\:t\:%H\x3a%M\x3a%S}':fontcolor=yellow:fontsize=60: \
+          text='TIMER-%{gmtime\:t\:%H\\\\\:%M\\\\\:%S}':fontcolor=yellow:fontsize=60: \
           x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y=30:box=1:boxcolor=black@0.6, \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=35:x=30:y=75:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)', \
           drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=40:x=(w-tw)/2:y=100:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]" \
