@@ -2,8 +2,8 @@ name: 24/7 Study Stream
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Automatically restarts every 6 hours
-  workflow_dispatch:       # Allows you to start it manually whenever you want
+    - cron: '0 */6 * * *'  # Resets the stream every 6 hours
+  workflow_dispatch:       # Manual trigger
 
 jobs:
   stream:
