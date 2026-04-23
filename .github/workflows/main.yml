@@ -28,20 +28,45 @@ jobs:
             ffmpeg -re -stream_loop -1 -i video.mp4 \
             -loop 1 -i break_pic.png \
             -stream_loop -1 -i rain.mp3 \
-            -filter_complex '[0:v]scale=1280:720[main]; [1:v]scale=1280:720[pic]; \
-            [main][pic]overlay=enable='\''gte(mod(t,3600),3000)'\''[v_mixed]; \
-            [v_mixed]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-            text='\''%{localtime\:%I\\\\\\:%M %p}'\'':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6, \
-            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-            text='\''%{pts\:gmtime\:0\:%H\\\\\\:%M\\\\\\:%S}'\'':fontcolor=yellow:fontsize=55: \
-            x='\''if(gte(mod(t,3600),3000),(w-tw)/2,30)'\'':y='\''if(gte(mod(t,3600),3000),40,80)'\'':box=1:boxcolor=black@0.6, \
-            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-            text='\''SESSION %{eif\:1+floor(t/3600)\:d}/6'\'':fontcolor=orange:fontsize=35: \
-            x='\''if(gte(mod(t,3600),3000),(w-tw)/2,30)'\'':y='\''if(gte(mod(t,3600),3000),180,150)'\'':box=1:boxcolor=black@0.6, \
-            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-            text='\''STUDY SESSION'\'':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='\''lt(mod(t,3600),3000)'\'', \
-            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf: \
-            text='\''BREAK TIME'\'':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='\''gte(mod(t,3600),3000)'\''[v]' \
+            -filter_complex "
+            [0:v]scale=1280:720[main];
+            [1:v]scale=1280:720[pic];
+
+            [main][pic]overlay=enable='gte(mod(t,3600),3000)'[v_mixed];
+
+            [v_mixed]
+            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:
+            text='%{localtime\:%X}':fontcolor=white:fontsize=40:
+            x=w-tw-30:y=30:box=1:boxcolor=black@0.6,
+
+            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:
+            text='%{pts\:hms}':fontcolor=yellow:fontsize=55:
+            x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':
+            y='if(gte(mod(t,3600),3000),40,80)':
+            box=1:boxcolor=black@0.6,
+
+            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:
+            text='SESSION %{eif\:1+floor(t/3600)\:d}/6':
+            fontcolor=orange:fontsize=35:
+            x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':
+            y='if(gte(mod(t,3600),3000),180,150)':
+            box=1:boxcolor=black@0.6,
+
+            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:
+            text='STUDY SESSION':
+            fontcolor=white:fontsize=30:
+            x=30:y=210:
+            box=1:boxcolor=black@0.6:
+            enable='lt(mod(t,3600),3000)',
+
+            drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:
+            text='BREAK TIME':
+            fontcolor=white:fontsize=45:
+            x=(w-tw)/2:y=110:
+            box=1:boxcolor=black@0.6:
+            enable='gte(mod(t,3600),3000)'
+            [v]
+            " \
             -map "[v]" -map 2:a:0 \
             -c:v libx264 -preset ultrafast \
             -b:v 2500k -maxrate 3000k -bufsize 6000k \
