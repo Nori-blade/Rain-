@@ -1,56 +1,20 @@
-name: 24/7 Study Stream
-
-on:
-  schedule:
-    - cron: '0 */6 * * *'  # Runs every 6 hours
-  workflow_dispatch:
-
-jobs:
-  stream:
-    runs-on: ubuntu-latest
-    timeout-minutes: 330  # 5.5 hours (safe margin before 6-hour limit)
-    env:
-      TZ: 'Asia/Kathmandu'
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install Tools
-        run: |
-          sudo apt update
-          sudo apt install ffmpeg fonts-liberation -y
-
-      - name: Download Media
-        run: |
-          # Add your actual media URLs or use repository files
-          # Example placeholder:
-          echo "video.mp4" > video.mp4  # Replace with actual download
-          echo "break_pic.png" > break_pic.png
-          echo "rain.mp3" > rain.mp3
-
-      - name: Create FFmpeg Filter Script
+- name: Create FFmpeg Filter Script
         run: |
           cat << 'EOF' > filter.txt
           [0:v]scale=1280:720[main];
           [1:v]scale=1280:720[pic];
           [main][pic]overlay=enable='gte(mod(t,3600),3000)'[v0];
-          [v0]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{localtime\\:%I\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1];
-          [v1]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{localtime\\:%H\\:%M\\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2];
-          [v2]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='SESSION %{eif\\:1+floor(t/3600)\\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3];
+          
+          # Clock: 12-Hour format with AM/PM (e.g., 01:05 AM)
+          [v0]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{localtime\:%I}%{char\:58}%{localtime\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1];
+          
+          # Timer: HH:MM:SS format (Zero Milliseconds)
+          [v1]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{pts\:gmtime\:0\:%H}%{char\:58}%{pts\:gmtime\:0\:%M}%{char\:58}%{pts\:gmtime\:0\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2];
+          
+          # Session Counter
+          [v2]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3];
+          
+          # Status Labels
           [v3]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='STUDY SESSION':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];
           [v4]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
           EOF
-
-      - name: Start Stream
-        run: |
-          ffmpeg -re -stream_loop -1 -i video.mp4 \
-          -loop 1 -i break_pic.png \
-          -stream_loop -1 -i rain.mp3 \
-          -filter_complex_script filter.txt \
-          -map "[v]" -map 2:a:0 \
-          -c:v libx264 -preset ultrafast -tune zerolatency \
-          -b:v 2500k -maxrate 3000k -bufsize 6000k \
-          -pix_fmt yuv420p -g 60 \
-          -c:a aac -b:a 128k -ar 44100 \
-          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
