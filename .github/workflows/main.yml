@@ -1,4 +1,4 @@
-name: 24/7 Dual Study Stream
+name: 24/7 Study Stream
 
 on:
   schedule:
@@ -40,5 +40,4 @@ jobs:
           -map "[v]" -map 2:a:0 \
           -c:v libx264 -preset ultrafast -b:v 2500k -maxrate 2500k -bufsize 5000k -pix_fmt yuv420p -g 60 \
           -c:a aac -b:a 128k -ar 44100 \
-          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}" \
-          -f flv "rtmp://live.twitch.tv/app/${{ secrets.TWITCH_STREAM_KEY }}"
+          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
