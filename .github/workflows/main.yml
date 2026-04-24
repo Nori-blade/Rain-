@@ -2,12 +2,13 @@ name: 24/7 Study Stream
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'  # Triggers every 6 hours
   workflow_dispatch:
 
 jobs:
   stream:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     env:
       TZ: 'Asia/Kathmandu'
 
@@ -22,30 +23,35 @@ jobs:
 
       - name: Create FFmpeg Filter Script
         run: |
-          # No comments allowed inside the EOF for the filter script
           cat << 'EOF' > filter.txt
           [0:v]scale=1280:720[main];
           [1:v]scale=1280:720[pic];
           [main][pic]overlay=enable='gte(mod(t,3600),3000)'[v0];
-          [v0]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{localtime\:%I\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1];
-          [v1]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{pts\:gmtime\:0\:%H\:%M\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2];
-          [v2]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3];
+          
+          # Clock with 12H format and AM/PM
+          [v0]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{localtime\\\:%I\\\\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1];
+          
+          # Timer HH:MM:SS (No milliseconds)
+          [v1]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='%{pts\\\:gmtime\\\:0\\\:%H\\\\\:%M\\\\\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2];
+          
+          # Session Counter
+          [v2]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='SESSION %{eif\\\:1+floor(t/3600)\\\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3];
+          
+          # Status Labels
           [v3]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='STUDY SESSION':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];
           [v4]drawtext=fontfile='/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf':text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
           EOF
 
       - name: Start Stream
         run: |
-          while true; do
-            ffmpeg -re -stream_loop -1 -i video.mp4 \
-            -loop 1 -i break_pic.png \
-            -stream_loop -1 -i rain.mp3 \
-            -filter_complex_script filter.txt \
-            -map "[v]" -map 2:a:0 \
-            -c:v libx264 -preset ultrafast -tune zerolatency \
-            -b:v 2500k -maxrate 3000k -bufsize 6000k \
-            -pix_fmt yuv420p -g 60 \
-            -c:a aac -b:a 128k -ar 44100 \
-            -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
-            sleep 5
-          done
+          # timeout stops the process after 355 minutes to let the cron job take over
+          timeout 355m ffmpeg -re -stream_loop -1 -i video.mp4 \
+          -loop 1 -i break_pic.png \
+          -stream_loop -1 -i rain.mp3 \
+          -filter_complex_script filter.txt \
+          -map "[v]" -map 2:a:0 \
+          -c:v libx264 -preset ultrafast -tune zerolatency \
+          -b:v 2500k -maxrate 3000k -bufsize 6000k \
+          -pix_fmt yuv420p -g 60 \
+          -c:a aac -b:a 128k -ar 44100 \
+          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}" || true
