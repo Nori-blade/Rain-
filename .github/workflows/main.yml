@@ -26,16 +26,8 @@ jobs:
 
       - name: Create FFmpeg Filter Script
         run: |
-          cat << 'EOF' > filter.txt
-[0:v]scale=1280:720[main];
-[1:v]scale=1280:720[pic];
-[main][pic]overlay=enable='gte(mod(t,3600),3000)'[v0];
-[v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%I\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1];
-[v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{pts\:gmtime\:0\:%H\:%M\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2];
-[v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3];
-[v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];
-[v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
-EOF
+          # We use a single quote string to hide all special characters from the editor
+          echo "[0:v][1:v]overlay=enable='gte(mod(t,3600),3000)'[v0]; [v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%I\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-30:y=30:box=1:boxcolor=black@0.6[v1]; [v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{pts\:gmtime\:0\:%H\:%M\:%S}':fontcolor=yellow:fontsize=55:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),40,80)':box=1:boxcolor=black@0.6[v2]; [v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x='if(gte(mod(t,3600),3000),(w-tw)/2,30)':y='if(gte(mod(t,3600),3000),180,150)':box=1:boxcolor=black@0.6[v3]; [v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4]; [v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]" > filter.txt
 
       - name: Start Stream
         run: |
@@ -51,6 +43,5 @@ EOF
             -pix_fmt yuv420p -g 60 \
             -c:a aac -b:a 128k -ar 44100 \
             -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
-            echo "Stream dropped. Restarting..."
             sleep 5
           done' || true
