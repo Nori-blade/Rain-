@@ -37,7 +37,7 @@ jobs:
 [v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=110:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
 EOF
 
-      - name: Start Stream with Auto-Reconnect
+      - name: Start Stream
         run: |
           timeout 355m bash -c '
           while true; do
@@ -51,6 +51,6 @@ EOF
             -pix_fmt yuv420p -g 60 \
             -c:a aac -b:a 128k -ar 44100 \
             -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
-            echo "Stream crashed. Restarting in 5s..."
+            echo "Stream dropped. Restarting..."
             sleep 5
           done' || true
