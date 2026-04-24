@@ -26,8 +26,6 @@ jobs:
 
       - name: Create FFmpeg Filter Script
         run: |
-          # We use the 'EOF' quoted heredoc to keep the content raw.
-          # To stop red lines, ensure there is NO indentation before the brackets [0:v]
           cat << 'EOF' > filter.txt
 [0:v]scale=1280:720[main];
 [1:v]scale=1280:720[pic];
