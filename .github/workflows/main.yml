@@ -1,4 +1,4 @@
-name: 24/7 Study Stream
+name: stream.yml
 
 on:
   schedule:
