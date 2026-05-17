@@ -38,11 +38,11 @@ jobs:
         run: |
           cat << 'EOF' > filter.txt
           [0:v][1:v]overlay=enable='gte(mod(t,3600),3000)'[v0];
-          [v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%I\:%M %p}':fontcolor=white:fontsize=40:x=30:y=100:box=1:boxcolor=black@0.6[v1];
-          [v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{pts\:gmtime\:0\:%M\:%S}':fontcolor=yellow:fontsize=55:x=30:y=300:box=1:boxcolor=black@0.6[v2];
-          [v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x=30:y=30:box=1:boxcolor=black@0.6[v3];
-          [v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=30:x=30:y=210:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];
-          [v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=30:y=210:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
+          [v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\:%I\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-40:y=40:box=1:boxcolor=black@0.6[v1];
+          [v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{pts\:gmtime\:0\:%M\:%S}':fontcolor=yellow:fontsize=55:x=40:y=160:box=1:boxcolor=black@0.6[v2];
+          [v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{eif\:1+floor(t/3600)\:d}/6':fontcolor=orange:fontsize=35:x=40:y=40:box=1:boxcolor=black@0.6[v3];
+          [v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=30:x=40:y=100:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];
+          [v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=(h-th)/2:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]
           EOF
 
       - name: Start Stream
