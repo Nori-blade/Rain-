@@ -34,14 +34,24 @@ jobs:
           sudo apt update
           sudo apt install -y ffmpeg fonts-liberation
 
-      - name: Create FFmpeg Filter Script
+      - name: Create FFmpeg Filter Script Safely
+        shell: python
         run: |
-          echo '[0:v][1:v]overlay=enable='\''gte(mod(t,3600),3000)'\''[v0];' > filter.txt
-          echo '[v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='\''%'\''{localtime\:%I\:%M %p}:fontcolor=white:fontsize=40:x=w-tw-40:y=60:box=1:boxcolor=black@0.6[v1];' >> filter.txt
-          echo '[v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='\''%'\''{pts\:gmtime\:0\:%M\:%S}:fontcolor=yellow:fontsize=55:x=40:y=180:box=1:boxcolor=black@0.6[v2];' >> filter.txt
-          echo '[v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='\''SESSION %'\''{eif\:1+floor(t/3600)\:d}/6:fontcolor=orange:fontsize=35:x=40:y=60:box=1:boxcolor=black@0.6[v3];' >> filter.txt
-          echo '[v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='\''STUDY SESSION'\'':fontcolor=white:fontsize=30:x=40:y=120:box=1:boxcolor=black@0.6:enable='\''lt(mod(t,3600),3000)'\''[v4];' >> filter.txt
-          echo '[v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='\''BREAK TIME'\'':fontcolor=white:fontsize=45:x=(w-tw)/2:y=(h-th)/2:box=1:boxcolor=black@0.6:enable='\''gte(mod(t,3600),3000)'\''[v]' >> filter.txt
+          import os
+          
+          # Clean text strings entirely detached from Bash/YAML escaping bugs
+          filters = [
+              "[0:v][1:v]overlay=enable='gte(mod(t,3600),3000)'[v0];",
+              "[v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\\:%I\\:%M %p}':fontcolor=white:fontsize=40:x=w-tw-40:y=60:box=1:boxcolor=black@0.6[v1];",
+              "[v1]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{pts\\:gmtime\\:0\\:%M\\:%S}':fontcolor=yellow:fontsize=55:x=40:y=180:box=1:boxcolor=black@0.6[v2];",
+              "[v2]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='SESSION %{eif\\:1+floor(t/3600)\\:d}/6':fontcolor=orange:fontsize=35:x=40:y=60:box=1:boxcolor=black@0.6[v3];",
+              "[v3]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='STUDY SESSION':fontcolor=white:fontsize=30:x=40:y=120:box=1:boxcolor=black@0.6:enable='lt(mod(t,3600),3000)'[v4];",
+              "[v4]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='BREAK TIME':fontcolor=white:fontsize=45:x=(w-tw)/2:y=(h-th)/2:box=1:boxcolor=black@0.6:enable='gte(mod(t,3600),3000)'[v]"
+          ]
+          
+          with open("filter.txt", "w", encoding="utf-8") as f:
+              f.write(" ".join(filters))
+          print("✅ filter.txt created cleanly with zero character loss.")
 
       - name: Start Stream
         run: |
