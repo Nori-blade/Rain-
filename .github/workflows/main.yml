@@ -37,7 +37,6 @@ jobs:
       - name: Create FFmpeg Filter Script Safely
         shell: python
         run: |
-          # Uses clean integer formatting tokens to completely block milliseconds and fix hidden syntax crashes
           filters = [
               "[0:v][1:v]overlay=enable='gte(mod(t,3600),3000)'[v0];",
               "[v0]drawtext=fontfile=/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:text='%{localtime\\:%I\\:%M %p}':fontcolor=white:fontsize=24:x=w-tw-40:y=100:box=1:boxcolor=black@0.6[v1];",
@@ -68,3 +67,7 @@ jobs:
             echo "⚠️ Stream connection lost. Reconnecting in 5 seconds..."
             sleep 5
           done' || true
+
+      # ADDED: Prevents GitHub from turning off your automated cron cycles
+      - name: Keep Workflow Alive
+        uses: gautamkrishnar/keepalive-workflow@v1
