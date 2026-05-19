@@ -2,7 +2,8 @@ name: 24/7 Study Stream
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    # Changed to run every 12 hours instead of 6 to prevent GitHub backend flagging
+    - cron: '0 */12 * * *'
   workflow_dispatch:
 
 env:
@@ -12,6 +13,12 @@ jobs:
   stream:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    
+    # Explicitly grants structural write permissions to clear token access errors
+    permissions:
+      contents: write
+      actions: write
+      
     env:
       TZ: 'Asia/Kathmandu'
 
@@ -48,7 +55,7 @@ jobs:
           
           with open("filter.txt", "w", encoding="utf-8") as f:
               f.write(" ".join(filters))
-          print("✅ Pure integer-based filter.txt generated successfully.")
+          print("✅ Filter configurations generated.")
 
       - name: Start Stream
         run: |
@@ -68,6 +75,5 @@ jobs:
             sleep 5
           done' || true
 
-      # ADDED: Prevents GitHub from turning off your automated cron cycles
       - name: Keep Workflow Alive
         uses: gautamkrishnar/keepalive-workflow@v1
