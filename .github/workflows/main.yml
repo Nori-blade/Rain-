@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     
-    # Explicitly grants structural write permissions to clear token access errors
+    # Explicitly grants structural write permissions to clear token access error
     permissions:
       contents: write
       actions: write
